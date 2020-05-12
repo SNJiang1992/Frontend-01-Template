@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.4.7/dist/g6.min.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      var set = new Set();
+      var globalProperties = [
+        "eval",
+        "isFinite",
+        "isNaN",
+        "parseFloat",
+        "parseInt",
+        "decodeURI",
+        "decodeURIComponent",
+        "encodeURI",
+        "encodeURIComponent",
+        "Array",
+        "Date",
+        "RegExp",
+        "Promise",
+        "Proxy",
+        "Map",
+        "WeakMap",
+        "Set",
+        "WeakSet",
+        "Function",
+        "Boolean",
+        "String",
+        "Number",
+        "Symbol",
+        "Object",
+        "Error",
+        "EvalError",
+        "RangeError",
+        "ReferenceError",
+        "SyntaxError",
+        "TypeError",
+        "URIError",
+        "ArrayBuffer",
+        "SharedArrayBuffer",
+        "DataView",
+        "Float32Array",
+        "Float64Array",
+        "Int8Array",
+        "Int16Array",
+        "Int32Array",
+        "Uint8Array",
+        "Uint16Array",
+        "Uint32Array",
+        "Uint8ClampedArray",
+        "Atomics",
+        "JSON",
+        "Math",
+        "Reflect",
+      ];
+      var queue = [];
+      for (var p of globalProperties) {
+        queue.push({
+          path: [p],
+          object: this[p],
+        });
+      }
+      var pathArray = [];
+      while (queue.length) {
+        current = queue.shift();
+        pathArray.push(current.path);
+        if (set.has(current.object)) {
+          continue;
+        }
+        set.add(current.object);
+        for (let p of Object.getOwnPropertyNames(current.object)) {
+          var property = Object.getOwnPropertyDescriptor(current.object, p);
+          if (
+            property.hasOwnProperty("value") &&
+            property.value instanceof Object &&
+            property.value !== null &&
+            (typeof property.value === "object" ||
+              typeof property.value === "function")
+          ) {
+            queue.push({
+              path: current.path.concat([p]),
+              object: property.value,
+            });
+          }
+          if (
+            property.hasOwnProperty("get") &&
+            typeof property.get === "funtion"
+          ) {
+            queue.push({
+              path: current.path.concat([p]),
+              object: property.get,
+            });
+          }
+          if (
+            property.hasOwnProperty("set") &&
+            typeof property.set === "funtion"
+          ) {
+            queue.push({
+              path: current.path.concat([p]),
+              object: property.set,
+            });
+          }
+        }
+      }
+
+      console.log(pathArray);
+      let treeData = {
+        id: "realm",
+        children: [],
+      };
+      for (let i of pathArray) {
+        if (i.length === 1) {
+          treeData.children.push({
+            id: i[0],
+            children: [],
+          });
+        } else if (i.length === 2) {
+          treeData.children
+            .filter((item) => item.id === i[0])[0]
+            .children.push({
+              id: i[1],
+              children: [],
+            });
+        } else {
+          treeData.children
+            .filter((item) => item.id === i[0])[0]
+            .children.filter((item) => item.id === i[1])[0]
+            .children.push({
+              id: i[2],
+              children: [],
+            });
+        }
+      }
+
+      fetch(
+        "https://gw.alipayobjects.com/os/antvdemo/assets/data/algorithm-category.json"
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          // console.log(JSON.stringify(data));
+          data = treeData;
+          const width = document.getElementById("container").scrollWidth;
+          const height =
+            document.getElementById("container").scrollHeight || 500;
+          const graph = new G6.TreeGraph({
+            container: "container",
+            width,
+            height,
+            modes: {
+              default: [
+                {
+                  type: "collapse-expand",
+                  onChange: function onChange(item, collapsed) {
+                    const data = item.get("model").data;
+                    data.collapsed = collapsed;
+                    return true;
+                  },
+                },
+                "drag-canvas",
+                "zoom-canvas",
+              ],
+            },
+            defaultNode: {
+              size: 26,
+              anchorPoints: [
+                [0, 0.5],
+                [1, 0.5],
+              ],
+              style: {
+                fill: "#C6E5FF",
+                stroke: "#5B8FF9",
+              },
+            },
+            defaultEdge: {
+              type: "cubic-horizontal",
+              style: {
+                stroke: "#A3B1BF",
+              },
+            },
+            layout: {
+              type: "dendrogram",
+              direction: "LR", // H / V / LR / RL / TB / BT
+              nodeSep: 30,
+              rankSep: 100,
+            },
+          });
+
+          graph.node(function (node) {
+            return {
+              label: node.id,
+              labelCfg: {
+                position:
+                  node.children && node.children.length > 0 ? "left" : "right",
+                offset: 5,
+              },
+            };
+          });
+
+          graph.data(data);
+          graph.render();
+          graph.fitView();
+        });
+    </script>
+  </body>
+</html>
