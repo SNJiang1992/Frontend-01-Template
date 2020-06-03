@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./match.js"></script>
+    <style>
+      div #id.class > a {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="test">
+      <div><a href="">123</a></div>
+      <div>
+        <div id="id" class="class">
+          <a href="">ceshi</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      match("div #id.class>a", document.getElementById("test"));
+    </script>
+  </body>
+</html>
