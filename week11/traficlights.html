@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      div {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        visibility: hidden;
+      }
+      #red {
+        background: red;
+      }
+      #yellow {
+        background: yellow;
+      }
+      #green {
+        background: green;
+      }
+      .show {
+        visibility: visible;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="red"></div>
+    <div id="yellow"></div>
+    <div id="green"></div>
+    <script>
+      //绿灯10s，黄灯2s，红灯5s
+      let redLight = document.getElementById("red");
+      let greenLight = document.getElementById("green");
+      let yellowLight = document.getElementById("yellow");
+
+      function green() {
+        redLight.classList.remove("show");
+        yellowLight.classList.remove("show");
+        greenLight.classList.add("show");
+      }
+      function red() {
+        redLight.classList.add("show");
+        yellowLight.classList.remove("show");
+        greenLight.classList.remove("show");
+      }
+      function yellow() {
+        redLight.classList.remove("show");
+        yellowLight.classList.add("show");
+        greenLight.classList.remove("show");
+      }
+      // function go() {
+      //   green();
+      //   setTimeout(yellow, 10000);
+      //   setTimeout(red, 12000);
+      //   setTimeout(go, 17000);
+      // }
+      // go();
+
+      function sleep(t) {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, t);
+        });
+      }
+
+      // function go() {
+      //   green();
+      //   sleep(1000)
+      //     .then(() => {
+      //       yellow();
+      //       return sleep(200);
+      //     })
+      //     .then(() => {
+      //       red();
+      //       return sleep(500);
+      //     })
+      //     .then(go);
+      // }
+      // go();
+      async function go() {
+        while (true) {
+          green();
+          await sleep(1000);
+          yellow();
+          await sleep(200);
+          red();
+          await sleep(500);
+        }
+      }
+      go();
+    </script>
+  </body>
+</html>
